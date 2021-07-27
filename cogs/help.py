@@ -15,7 +15,7 @@ class Help(commands.Cog):
         emb.set_author(name=self.bot.user.name, icon_url=str(self.bot.user.avatar_url_as(static_format = "png")))
         emb.set_footer(text=ctx.author, icon_url=str(ctx.author.avatar_url_as(static_format = "png")))
         error = discord.Embed(description = f"""```sh
-Command "{command}" not found
+{language['commandNotFound'].replace('{command}', command)}
 ```""", colour = discord.Colour.red())
 
         if command:
@@ -74,8 +74,8 @@ Command "{command}" not found
                     res += f"{res_}\n"
                     emb.add_field(name=str(cog_), value=res_)
 
-        emb.set_footer(text = f"Need more help? Use \"{prefix}help <command>\".", icon_url = str(ctx.author.avatar_url_as(static_format = "png")))
-        await ctx.send(embed = emb)
+        emb.set_footer(text=language['helpFooter'].replace("{prefix}", prefix), icon_url = str(ctx.author.avatar_url_as(static_format = "png")))
+        await ctx.send(embed=emb)
 
 def setup(bot):
     bot.add_cog(Help(bot))

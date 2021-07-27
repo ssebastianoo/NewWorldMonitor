@@ -26,7 +26,9 @@ class Monitor(commands.Cog):
                         for id in channels_ids:
                             channel = self.bot.get_channel(id)
                             if channel:
-                                await channel.send(embed=emb)
+                                msg = await channel.send(embed=emb)
+                                try: await msg.publish()
+                                except: pass
 
                         await self.bot.db.update_server(server, new_status)
         except Exception as e:
