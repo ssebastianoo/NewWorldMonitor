@@ -1,4 +1,4 @@
-import discord
+import discord, config
 from discord.ext import commands
 
 class Misc(commands.Cog):
