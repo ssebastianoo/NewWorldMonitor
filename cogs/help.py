@@ -1,4 +1,4 @@
-import discord
+import discord, config
 from discord.ext import commands
 
 class Help(commands.Cog):
@@ -10,7 +10,6 @@ class Help(commands.Cog):
         "Get some help"
 
         prefix = ctx.prefix
-
         emb = discord.Embed(colour=discord.Colour.blurple())
         emb.set_author(name=self.bot.user.name, icon_url=str(self.bot.user.avatar_url_as(static_format = "png")))
         emb.set_footer(text=ctx.author, icon_url=str(ctx.author.avatar_url_as(static_format = "png")))
@@ -74,7 +73,7 @@ class Help(commands.Cog):
                     res += f"{res_}\n"
                     emb.add_field(name=str(cog_), value=res_)
 
-        emb.set_footer(text=language['helpFooter'].replace("{prefix}", prefix), icon_url = str(ctx.author.avatar_url_as(static_format = "png")))
+        emb.set_footer(text=f"Need more help? Use \"{prefix}help <command>\".", icon_url = str(ctx.author.avatar_url_as(static_format = "png")))
         await ctx.send(embed=emb)
 
 def setup(bot):
