@@ -1,6 +1,6 @@
 class bot:
     prefix = "m!"
-    token = "ODY4NjAwNDgwNTE3OTkyNDkw.YPyBPA.tJ1hc9BZqmUDZWTTUpXRi9hqDDQ"
+    token = "abc"
 
 class emojis:
     success = "✅"
