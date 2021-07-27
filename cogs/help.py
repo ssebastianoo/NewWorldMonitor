@@ -14,7 +14,7 @@ class Help(commands.Cog):
         emb.set_author(name=self.bot.user.name, icon_url=str(self.bot.user.avatar_url_as(static_format = "png")))
         emb.set_footer(text=ctx.author, icon_url=str(ctx.author.avatar_url_as(static_format = "png")))
         error = discord.Embed(description = f"""```sh
-{language['commandNotFound'].replace('{command}', command)}
+Command \"{command}\" not found
 ```""", colour = discord.Colour.red())
 
         if command:
