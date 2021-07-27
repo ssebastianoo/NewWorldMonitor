@@ -1,2 +1,0 @@
-class English:
-    def english
