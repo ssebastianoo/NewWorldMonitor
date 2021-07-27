@@ -128,22 +128,6 @@ class Monitor(commands.Cog):
         await self.bot.db.remove_log(server['name'].lower(), ctx.guild.id)
         await msg.edit(content=language['removeLogs'].replace("{server['name']}", server['name']), embed=None)
 
-    @commands.command(name="set-language", aliases=["setlanguage", "language", "lang", "set-lang"])
-    @commands.has_permissions(manage_guild=True)
-    async def set_language(self, ctx, language_name):
-        "Change the bot language"
-
-        language = await self.bot.db.get_language(ctx.guild.id)
-        language_name = language_name.lower().replace("it", "italian").replace("italiano", "italian").replace("en", "english").replace("eng", "english")
-
-        if language_name.lower() not in [l.lower() for l in config.av_languages]:
-            emb = discord.Embed(description=language["invalidLanguage"].replace("{' '.join(config.av_languages)}", str(', '.join(config.av_languages))), colour=discord.Colour.red())
-            return await ctx.reply(embed=emb, mention_author=False)
-
-        await self.bot.db.update_language(ctx.guild.id, language_name)
-        language = await self.bot.db.get_language(ctx.guild.id)
-        await ctx.reply(language["languageUpdate"].replace("{language_name}", language_name), mention_author=False)
-
     @commands.command(name="check-logs", aliases=["checklogs", "check-log", "checklog"])
     @commands.has_permissions(manage_guild=True)
     async def check_logs(self, ctx):
