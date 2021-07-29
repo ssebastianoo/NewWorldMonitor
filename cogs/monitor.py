@@ -20,7 +20,7 @@ class Monitor(commands.Cog):
                         emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
                         colour = discord.Colour.green() if new_status == "up" else discord.Colour.red()
                         status = 'Offline' if new_status == 'down' else 'Online'
-                        emb = discord.Embed(title=f"🐉 {server}", description=f"**{status}** {emojis[new_status]}", colour=colour)
+                        emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server}", description=f"**{status}** {emojis[new_status]}", colour=colour)
 
                         msgs = await self.bot.db.get_messages(server)
 
@@ -101,7 +101,7 @@ class Monitor(commands.Cog):
         emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
         colour = discord.Colour.green() if server['status'] == "up" else discord.Colour.red()
         status = 'Offline' if server['status'] == 'down' else 'Online'
-        emb = discord.Embed(title=f"🐉 {server['name']}", description=f"**{status}** {emojis[server['status']]}", colour=colour)
+        emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server['name']}", description=f"**{status}** {emojis[server['status']]}", colour=colour)
         msg_ = await channel.send(embed=emb)
 
         await self.bot.db.update_message(server['name'], msg_.id, channel.id, ctx.guild.id)
