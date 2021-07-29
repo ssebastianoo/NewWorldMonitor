@@ -6,7 +6,7 @@ class Monitor(commands.Cog):
         self.bot = bot
         self.check_servers.start()
 
-    @tasks.loop(seconds=20)
+    @tasks.loop(seconds=60)
     async def check_servers(self):
         try:
             servers = await self.bot.monitor.get_servers_status()
@@ -17,18 +17,21 @@ class Monitor(commands.Cog):
                     await self.bot.db.update_server(server, new_status)
                 else:
                     if new_status != old_status:
-                        status = f'online {config.emojis.success}' if new_status == "up" else f'offline {config.emojis.fail}'
+                        emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
                         colour = discord.Colour.green() if new_status == "up" else discord.Colour.red()
-                        emb = discord.Embed(description=f"Server **{server}** is now **{status}**", colour=colour)
+                        status = 'Offline' if new_status == 'down' else 'Online'
+                        emb = discord.Embed(title=f"🐉 {server}", description=f"**{status}** {emojis[new_status]}", colour=colour)
 
-                        channels_ids = await self.bot.db.get_channels(server)
+                        msgs = await self.bot.db.get_messages(server)
 
-                        for id in channels_ids:
-                            channel = self.bot.get_channel(id)
-                            if channel:
-                                msg = await channel.send(embed=emb)
-                                try: await msg.publish()
-                                except: pass
+                        for data in msgs:
+                            channel = self.bot.get_channel(data['channel'])
+                            try:
+                                message = await channel.fetch_message(data['message'])
+                                if channel:
+                                    await message.edit(content=None, embed=emb)
+                            except:
+                                pass
 
                         await self.bot.db.update_server(server, new_status)
         except Exception as e:
@@ -89,20 +92,19 @@ class Monitor(commands.Cog):
         channel = channel or ctx.channel
         language = await self.bot.db.get_language(ctx.guild.id)
 
-        if server.lower() == "all":
-            servers = await self.bot.monitor.get_servers_status()
-            for s in servers:
-                await self.bot.db.update_channel(s, channel.id, ctx.guild.id)
-            return await msg.edit(content=language["updateAllServers"].replace("{channel.mention}", channel.mention), embed=None)
-
         try:
             server = await self.bot.monitor.get_server_status(server)
         except KeyError:
             emb = discord.Embed(description=language["serverNotFound"], colour=discord.Colour.red())
             return await msg.edit(embed=emb)
 
-        await self.bot.db.update_channel(server['name'], channel.id, ctx.guild.id)
+        emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
+        colour = discord.Colour.green() if server['status'] == "up" else discord.Colour.red()
+        status = 'Offline' if server['status'] == 'down' else 'Online'
+        emb = discord.Embed(title=f"🐉 {server['name']}", description=f"**{status}** {emojis[server['status']]}", colour=colour)
+        msg_ = await channel.send(embed=emb)
 
+        await self.bot.db.update_message(server['name'], msg_.id, channel.id, ctx.guild.id)
         await msg.edit(content=language["updateServer"].replace("{server['name']}", server['name']).replace("{channel.mention}", channel.mention), embed=None)
 
     @commands.command(name="remove-logs", aliases=["removelogs", "removelog", "remove-log"])

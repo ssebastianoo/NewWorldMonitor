@@ -6,7 +6,7 @@ class Monitor:
         self.up = "ags-ServerStatus-content-responses-response-server-status--up"
         self.down = "ags-ServerStatus-content-responses-response-server-status--down"
 
-    async def get_server_status(self, server):
+    async def get_server_status(self,   server):
         r = await self.session.get("https://www.newworld.com/it-it/support/server-status")
         soup = bs4.BeautifulSoup(await r.text(), 'html5lib')
 
@@ -50,7 +50,7 @@ class DataBase:
         self.db = connection
 
     async def check(self):
-        await self.db.execute("CREATE TABLE IF NOT EXISTS channels (server text, channel id, guild id)")
+        await self.db.execute("CREATE TABLE IF NOT EXISTS messages (server text, message id, channel id, guild id)")
         await self.db.execute("CREATE TABLE IF NOT EXISTS servers (server text, status text)")
         await self.db.execute("CREATE TABLE IF NOT EXISTS language (guild id, language text)")
         await self.db.commit()
@@ -67,27 +67,34 @@ class DataBase:
             await self.db.execute("UPDATE servers SET status=? WHERE server=?", (status.lower(), server.lower()))
         await self.db.commit()
 
-    async def get_channels(self, server):
-        data = await (await self.db.execute("SELECT channel FROM channels WHERE server=?", (server.lower(),))).fetchall()
+    async def get_messages(self, server):
+        data = await (await self.db.execute("SELECT message, channel FROM messages WHERE server=?", (server.lower(),))).fetchall()
         if len(data) == 0:
             return None
         else:
-            return [d[0] for d in data]
+            return [{'message': d[0], 'channel': d[1]} for d in data]
 
-    async def update_channel(self, server, channel, guild):
-        data = await (await self.db.execute("SELECT channel FROM channels WHERE server=?", (server.lower(),))).fetchone()
+    async def update_message(self, server, message, channel, guild):
+        data = await (await self.db.execute("SELECT message FROM messages WHERE server=?", (server.lower(),))).fetchone()
         if not data:
-            await self.db.execute("INSERT INTO channels (server, channel, guild) VALUES (?, ?, ?)", (server.lower(), channel, guild))
+            await self.db.execute("INSERT INTO messages (server, message, channel, guild) VALUES (?, ?, ?, ?)", (server.lower(), message, channel, guild))
         else:
-            await self.db.execute("UPDATE channels SET channel=?, guild=? WHERE server=?", (channel, guild, server.lower()))
+            await self.db.execute("UPDATE messages SET message=?, channel=?, guild=? WHERE server=?", (message, channel, guild, server.lower()))
         await self.db.commit()
 
     async def remove_log(self, server, guild):
-        await self.db.execute("DELETE FROM channels WHERE server=? AND guild=?", (server.lower(), guild))
+        await self.db.execute("DELETE FROM messages WHERE server=? AND guild=?", (server.lower(), guild))
         await self.db.commit()
 
+    async def get_log(self, server, guild):
+        data = await (await self.db.execute("SELECT message, channel FROM messages WHERE server=? AND guild=?", (server.lower(), guild,))).fetchone()
+        if not data:
+            return None
+        else:
+            return {'message': data[0], 'channel': data[1]}
+
     async def get_logs(self, guild):
-        data = await (await self.db.execute("SELECT channel, server FROM channels WHERE guild=?", (guild,))).fetchall()
+        data = await (await self.db.execute("SELECT channel, server FROM messages WHERE guild=?", (guild,))).fetchall()
         if len(data) == 0:
             return None
         else:
