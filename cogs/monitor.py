@@ -9,7 +9,7 @@ class Monitor(commands.Cog):
 
     @tasks.loop(seconds=10)
     async def check_servers(self):
-        now = datetime.datetime.now().strftime("[%Y/%m/%d %X]")
+        now = datetime.datetime.utcnow().strftime("[%Y/%m/%d %X UTC]")
         try:
             print(f"{now} fetching servers...")
             servers = await self.bot.monitor.get_servers_status()
