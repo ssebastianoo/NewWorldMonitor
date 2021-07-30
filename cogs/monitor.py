@@ -1,41 +1,55 @@
-import discord, utils, config
+import discord, utils, config, datetime
 from discord.ext import commands, tasks
+from termcolor import colored
 
 class Monitor(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.check_servers.start()
 
-    @tasks.loop(seconds=60)
+    @tasks.loop(seconds=10)
     async def check_servers(self):
+        now = datetime.datetime.now().strftime("[%Y/%m/%d %X]")
         try:
+            print(f"{now} fetching servers...")
             servers = await self.bot.monitor.get_servers_status()
+            print( colored(f"{now} found {len(servers)} servers", 'green') )
+            print(f"{now} searching for changes")
             for server in servers:
                 new_status = servers[server]
                 old_status = await self.bot.db.get_status(server)
                 if not old_status:
+                    print( colored(f"{now} {server} doesn't have a status, fixing...", 'yellow'))
                     await self.bot.db.update_server(server, new_status)
+                    print( colored(f"created status for {server} ({new_status})\n", 'green'))
                 else:
                     if new_status != old_status:
+                        print( colored(f"{now} found a change for server {server} (old: {old_status} new: {new_status})", 'yellow'))
                         emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
                         colour = discord.Colour.green() if new_status == "up" else discord.Colour.red()
                         status = 'Offline' if new_status == 'down' else 'Online'
                         emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server}", description=f"**{status}** {emojis[new_status]}", colour=colour)
 
                         msgs = await self.bot.db.get_messages(server)
-
-                        for data in msgs:
-                            channel = self.bot.get_channel(data['channel'])
-                            try:
-                                message = await channel.fetch_message(data['message'])
-                                if channel:
-                                    await message.edit(content=None, embed=emb)
-                            except:
-                                pass
+                        if msgs:
+                            print(f"{now} getting all messages to edit")
+                            for data in msgs:
+                                channel = self.bot.get_channel(data['channel'])
+                                try:
+                                    message = await channel.fetch_message(data['message'])
+                                    if channel:
+                                        await message.edit(content=None, embed=emb)
+                                except:
+                                    pass
+                            print(f"{now} finished editing")
+                        else:
+                            print(f"{now} server doesn't have any log")
 
                         await self.bot.db.update_server(server, new_status)
+                        print( colored(f"{now} updated status for server {server} to {new_status}\n", 'green'))
+            print("\n")
         except Exception as e:
-            print(e)
+            print( colored(f'{now} {e}', 'red') )
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
@@ -78,7 +92,7 @@ class Monitor(commands.Cog):
             return await msg.edit(embed=emb)
 
         emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
-        emb = discord.Embed(description = f"**{server['name']}** {emojis[server['status']]}", colour=discord.Colour.green())
+        emb = discord.Embed(description = f"**{server['name']}** {emojis[server['status']]}", colour=discord.Colour.green() if server['status'] == "up" else discord.Colour.red())
         await msg.edit(embed=emb)
 
     @commands.command(name="set-logs", aliases=["logs", "set-log", "setlog", "setlogs"])
