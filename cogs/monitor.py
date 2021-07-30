@@ -15,6 +15,7 @@ class Monitor(commands.Cog):
             servers = await self.bot.monitor.get_servers_status()
             print( colored(f"{now} found {len(servers)} servers", 'green') )
             print(f"{now} searching for changes")
+            changed = False
             for server in servers:
                 new_status = servers[server]
                 old_status = await self.bot.db.get_status(server)
@@ -47,6 +48,9 @@ class Monitor(commands.Cog):
 
                         await self.bot.db.update_server(server, new_status)
                         print( colored(f"{now} updated status for server {server} to {new_status}\n", 'green'))
+                        changed = True
+            if not changed:
+                print( colored(f'{now} nothing to change', 'yellow') )
             print("\n")
         except Exception as e:
             print( colored(f'{now} {e}', 'red') )
