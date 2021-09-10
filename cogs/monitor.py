@@ -26,10 +26,9 @@ class Monitor(commands.Cog):
                 else:
                     if new_status != old_status:
                         print( colored(f"{now} found a change for server {server} (old: {old_status} new: {new_status})", 'yellow'))
-                        emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
-                        colour = discord.Colour.green() if new_status == "up" else discord.Colour.red()
-                        status = 'Offline' if new_status == 'down' else 'Online'
-                        emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server}", description=f"**{status}** {emojis[new_status]}", colour=colour)
+                        colour = config.bot.colour[new_status]
+                        status = config.bot.full_status[new_status]
+                        emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server}", description=f"**{status}** {config.emojis.status[new_status]}", colour=colour)
 
                         msgs = await self.bot.db.get_messages(server)
                         if msgs:
@@ -95,8 +94,7 @@ class Monitor(commands.Cog):
             emb = discord.Embed(description=language["serverNotFound"], colour=discord.Colour.red())
             return await msg.edit(embed=emb)
 
-        emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
-        emb = discord.Embed(description = f"**{server['name']}** {emojis[server['status']]}", colour=discord.Colour.green() if server['status'] == "up" else discord.Colour.red())
+        emb = discord.Embed(description = f"**{server['name']}** {config.emojis.status[server['status']]}", colour=discord.Colour.green() if server['status'] == "up" else discord.Colour.red())
         await msg.edit(embed=emb)
 
     @commands.command(name="set-logs", aliases=["logs", "set-log", "setlog", "setlogs"])
@@ -116,10 +114,9 @@ class Monitor(commands.Cog):
             emb = discord.Embed(description=language["serverNotFound"], colour=discord.Colour.red())
             return await msg.edit(embed=emb)
 
-        emojis = {'up': config.emojis.success, 'down': config.emojis.fail}
-        colour = discord.Colour.green() if server['status'] == "up" else discord.Colour.red()
-        status = 'Offline' if server['status'] == 'down' else 'Online'
-        emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server['name']}", description=f"**{status}** {emojis[server['status']]}", colour=colour)
+        colour = config.bot.colour[server['status']]
+        status = config.bot.full_status[server['status']]
+        emb = discord.Embed(title=f"<:NW_Official_logo:668448311216308236> {server['name']}", description=f"**{status}** {config.emojis.status[server['status']]}", colour=colour)
         msg_ = await channel.send(embed=emb)
 
         await self.bot.db.update_message(server['name'], msg_.id, channel.id, ctx.guild.id)

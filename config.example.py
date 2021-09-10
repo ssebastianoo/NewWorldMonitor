@@ -5,6 +5,8 @@ class bot:
 class emojis:
     success = "✅"
     fail = "❌"
+    maintenance = "🔧"
+    full = "🌡️"
     loading = "<a:loading:869177307066155078>"
 
 av_languages = ["english", "italian"]

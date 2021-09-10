@@ -3,8 +3,12 @@ import bs4, html5lib, config
 class Monitor:
     def __init__(self, session):
         self.session = session
-        self.up = "ags-ServerStatus-content-responses-response-server-status--up"
-        self.down = "ags-ServerStatus-content-responses-response-server-status--down"
+        self.statuses = {
+            "up": "ags-ServerStatus-content-responses-response-server-status--up",
+            "down": "ags-ServerStatus-content-responses-response-server-status--down",
+            "full": "ags-ServerStatus-content-responses-response-server-status--full",
+            "maintenance": "ags-ServerStatus-content-responses-response-server-status--maintenance"
+        }
 
     async def get_server_status(self,   server):
         r = await self.session.get("https://www.newworld.com/it-it/support/server-status")
@@ -18,11 +22,11 @@ class Monitor:
 
         else:
             classes = data[0].find("div", {"class": "ags-ServerStatus-content-responses-response-server-status"})["class"]
-            if self.down in classes:
-                status = "down"
 
-            elif self.up in classes:
-                status = "up"
+            for s in self.statuses:
+                if self.statuses[s] in classes:
+                    status = s
+                    break
 
             return {"name": data[0].find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace(" ", "").replace("\n", ""), "status": status}
 
@@ -37,11 +41,11 @@ class Monitor:
         for server in res:
             name = server.find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace(" ", "").replace("\n", "")
             data = server.find("div", {"class": "ags-ServerStatus-content-responses-response-server-status"})
-            if self.down in data["class"]:
-                servers[name] = "down"
-
-            elif self.up in data["class"]:
-                servers[name] = "up"
+           
+            for s in self.statuses:
+                if self.statuses[s] in data["class"]:
+                    servers[name] = s
+                    break
 
         return servers
 
