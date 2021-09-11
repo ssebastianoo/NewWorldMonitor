@@ -6,6 +6,7 @@ class Monitor(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.check_servers.start()
+        self.converter = commands.TextChannelConverter()
 
     @tasks.loop(seconds=10)
     async def check_servers(self):
@@ -56,7 +57,7 @@ class Monitor(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def check(self, ctx, server_name=None):
+    async def check(self, ctx, *, server_name=None):
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
         msg = await ctx.reply(embed=emb, mention_author=False)
@@ -97,10 +98,21 @@ class Monitor(commands.Cog):
         emb = discord.Embed(description = f"**{server['name']}** {config.emojis.status[server['status']]}", colour=discord.Colour.green() if server['status'] == "up" else discord.Colour.red())
         await msg.edit(embed=emb)
 
-    @commands.command(name="set-logs", aliases=["logs", "set-log", "setlog", "setlogs"])
+    @commands.command(name="set-logs", aliases=["logs", "set-log", "setlog", "setlogs"], usage="<server> [channel]")
     @commands.has_permissions(manage_guild=True)
-    async def set_logs(self, ctx, server, channel: discord.TextChannel=None):
+    async def set_logs(self, ctx, *, args):
         "Set the channel where server logs will be sent"
+
+        args_list = args.split(" ")
+
+        try:
+            channel = await self.converter.convert(ctx, args_list[-1])
+        except commands.errors.ChannelNotFound:
+            channel = ctx.channel
+        else:
+            del args_list[-1]
+        
+        server = " ".join(args_list)
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
         msg = await ctx.reply(embed=emb, mention_author=False)
@@ -124,7 +136,7 @@ class Monitor(commands.Cog):
 
     @commands.command(name="remove-logs", aliases=["removelogs", "removelog", "remove-log"])
     @commands.has_permissions(manage_guild=True)
-    async def remove_logs(self, ctx, server):
+    async def remove_logs(self, ctx, *, server):
         "Remove logs"
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())

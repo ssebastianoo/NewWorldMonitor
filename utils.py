@@ -10,12 +10,12 @@ class Monitor:
             "maintenance": "ags-ServerStatus-content-responses-response-server-status--maintenance"
         }
 
-    async def get_server_status(self,   server):
+    async def get_server_status(self, server):
         r = await self.session.get("https://www.newworld.com/it-it/support/server-status")
         soup = bs4.BeautifulSoup(await r.text(), 'html5lib')
 
         res = soup.findAll("div", {"class": 'ags-ServerStatus-content-responses-response-server'})
-        data = [r for r in res if r.find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace(" ", "").replace("\n", "").lower() == server.lower()]
+        data = [r for r in res if r.find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace("\n", "").strip().lower() == server.lower()]
 
         if len(data) == 0:
             raise KeyError('server not found')
@@ -28,7 +28,7 @@ class Monitor:
                     status = s
                     break
 
-            return {"name": data[0].find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace(" ", "").replace("\n", ""), "status": status}
+            return {"name": data[0].find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace("\n", "").strip(), "status": status}
 
     async def get_servers_status(self):
         r = await self.session.get("https://www.newworld.com/it-it/support/server-status")
@@ -39,7 +39,7 @@ class Monitor:
         servers = dict()
 
         for server in res:
-            name = server.find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace(" ", "").replace("\n", "")
+            name = server.find("div", {"class": "ags-ServerStatus-content-responses-response-server-name"}).text.replace("\n", "").strip()
             data = server.find("div", {"class": "ags-ServerStatus-content-responses-response-server-status"})
            
             for s in self.statuses:
