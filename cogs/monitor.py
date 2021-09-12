@@ -74,10 +74,7 @@ class Monitor(commands.Cog):
             for server in servers:
                 count += 1
                 name = f"{server}{' ' * (12 - (len(server) if len(server) >= 0 else 0))}"
-                if servers[server] == "up":
-                    res += f"{name} {config.emojis.success}\n"
-                elif servers[server] == "down":
-                    res += f"{name} {config.emojis.fail}\n"
+                res += f"{name} {config.emojis.status[servers[server]]}\n"
 
                 if count >= 5:
                     res += "\n```"
