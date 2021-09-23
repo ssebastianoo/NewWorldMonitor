@@ -5,8 +5,7 @@ os.environ["JISHAKU_NO_UNDERSCORE"] = "True"
 os.environ["JISHAKU_NO_DM_TRACEBACK"] = "True"
 os.environ["JISHAKU_HIDE"] = "True"
 
-intents = discord.Intents.default()
-bot = commands.Bot(command_prefix=config.bot.prefix, intents=intents)
+bot = commands.Bot(command_prefix=config.bot.prefix, intents=discord.Intents(guilds=True), slash_commands=True)
 bot.load_extension("jishaku")
 bot.remove_command("help")
 

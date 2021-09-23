@@ -57,12 +57,17 @@ class Monitor(commands.Cog):
 
     @commands.command()
     @commands.has_permissions(manage_guild=True)
-    async def check(self, ctx, *, server_name=None):
+    async def check(self, ctx, *, server=None):
+
+        "Check server statuses"
+        
+        server_name = server
+        print(server_name)
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
         msg = await ctx.reply(embed=emb, mention_author=False)
 
-        language = await self.bot.db.get_language(ctx.guild.id)
+        language = await self.bot.db.get_language(ctx.guild)
         if not server_name:
 
             servers = await self.bot.monitor.get_servers_status()
@@ -97,25 +102,16 @@ class Monitor(commands.Cog):
 
     @commands.command(name="set-logs", aliases=["logs", "set-log", "setlog", "setlogs"], usage="<server> [channel]")
     @commands.has_permissions(manage_guild=True)
-    async def set_logs(self, ctx, *, args):
+    async def set_logs(self, ctx, server, channel: discord.TextChannel=None):
         "Set the channel where server logs will be sent"
 
-        args_list = args.split(" ")
-
-        try:
-            channel = await self.converter.convert(ctx, args_list[-1])
-        except commands.errors.ChannelNotFound:
-            channel = ctx.channel
-        else:
-            del args_list[-1]
-        
-        server = " ".join(args_list)
+        channel = channel or ctx.channel
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
         msg = await ctx.reply(embed=emb, mention_author=False)
 
         channel = channel or ctx.channel
-        language = await self.bot.db.get_language(ctx.guild.id)
+        language = await self.bot.db.get_language(ctx.guild)
 
         try:
             server = await self.bot.monitor.get_server_status(server)
@@ -139,7 +135,7 @@ class Monitor(commands.Cog):
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
         msg = await ctx.reply(embed=emb, mention_author=False)
 
-        language = await self.bot.db.get_language(ctx.guild.id)
+        language = await self.bot.db.get_language(ctx.guild)
 
         if server.lower() == "all":
             servers = await self.bot.monitor.get_servers_status()
@@ -164,7 +160,7 @@ class Monitor(commands.Cog):
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
         msg = await ctx.reply(embed=emb, mention_author=False)
 
-        language = await self.bot.db.get_language(ctx.guild.id)
+        language = await self.bot.db.get_language(ctx.guild)
 
         logs = await self.bot.db.get_logs(ctx.guild.id)
         if not logs:

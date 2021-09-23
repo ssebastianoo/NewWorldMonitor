@@ -119,5 +119,7 @@ class DataBase:
         await self.db.commit()
 
     async def get_language(self, guild):
-        data = await (await self.db.execute("SELECT language FROM language WHERE guild=?", (guild,))).fetchone()
+        if not guild:
+            return config.languages['english']
+        data = await (await self.db.execute("SELECT language FROM language WHERE guild=?", (guild.id,))).fetchone()
         return config.languages[data[0]] if data else config.languages['english']
