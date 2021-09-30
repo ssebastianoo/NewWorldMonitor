@@ -76,6 +76,8 @@ class Monitor(commands.Cog):
             res = "```\n"
             count = 0
             slots = 0
+            embeds = [emb]
+            emb_count = 0
             for server in servers:
                 count += 1
                 name = f"{server}{' ' * (12 - (len(server) if len(server) >= 0 else 0))}"
@@ -84,12 +86,24 @@ class Monitor(commands.Cog):
                 if count >= 5:
                     res += "\n```"
                     slots += 1
-                    emb.add_field(name=language["slot"].replace("{slots}", str(slots)), value=res)
+                    if slots % 12 == 0:
+                        emb_count += 1
+                        embeds.append(discord.Embed(title=language["checkTitle"], colour=discord.Colour.green(), timestamp=ctx.message.created_at))
+                    embeds[emb_count].add_field(name=language["slot"].replace("{slots}", str(slots)), value=res)
 
                     count = 0
                     res = "```\n"
 
-            return await msg.edit(embed=emb)
+            await msg.edit(embed=embeds[0])
+            print(len(embeds))
+            if len(embeds) > 1:
+                x = 0
+                for emb in embeds:
+                    if x != 0:
+                        await ctx.send(embed=emb)
+                    else:
+                        x += 1
+            return
 
         try:
             server = await self.bot.monitor.get_server_status(server_name)
