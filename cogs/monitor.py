@@ -65,7 +65,7 @@ class Monitor(commands.Cog):
         print(server_name)
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
-        msg = await ctx.reply(embed=emb, mention_author=False)
+        msg = await ctx.send(embed=emb)
 
         language = await self.bot.db.get_language(ctx.guild)
         if not server_name:
@@ -122,7 +122,7 @@ class Monitor(commands.Cog):
         channel = channel or ctx.channel
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
-        msg = await ctx.reply(embed=emb, mention_author=False)
+        msg = await ctx.send(embed=emb)
 
         channel = channel or ctx.channel
         language = await self.bot.db.get_language(ctx.guild)
@@ -147,7 +147,7 @@ class Monitor(commands.Cog):
         "Remove logs"
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
-        msg = await ctx.reply(embed=emb, mention_author=False)
+        msg = await ctx.send(embed=emb)
 
         language = await self.bot.db.get_language(ctx.guild)
 
@@ -172,7 +172,7 @@ class Monitor(commands.Cog):
         "Check logs settings"
 
         emb = discord.Embed(description=config.emojis.loading, colour=discord.Colour.green())
-        msg = await ctx.reply(embed=emb, mention_author=False)
+        msg = await ctx.send(embed=emb)
 
         language = await self.bot.db.get_language(ctx.guild)
 

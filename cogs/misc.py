@@ -13,7 +13,7 @@ class Misc(commands.Cog):
 
         invite = discord.utils.oauth_url(self.bot.user.id, permissions=discord.Permissions(permissions=18432), scopes=('bot','applications.commands'))
         emb = discord.Embed(description=f"[{language['invite']}]({invite})", colour=discord.Colour.blurple())
-        await ctx.reply(embed=emb, mention_author=False)
+        await ctx.send(embed=emb)
 
     @commands.command(name="set-language", aliases=["setlanguage", "language", "lang", "set-lang"])
     @commands.has_permissions(manage_guild=True)
@@ -26,11 +26,11 @@ class Misc(commands.Cog):
 
         if language_name.lower() not in [l.lower() for l in config.av_languages]:
             emb = discord.Embed(description=language["invalidLanguage"].replace("{' '.join(config.av_languages)}", str(', '.join(config.av_languages))), colour=discord.Colour.red())
-            return await ctx.reply(embed=emb, mention_author=False)
+            return await ctx.send(embed=emb)
 
         await self.bot.db.update_language(ctx.guild.id, language_name)
         language = await self.bot.db.get_language(ctx.guild)
-        await ctx.reply(language["languageUpdate"].replace("{language_name}", language_name), mention_author=False)
+        await ctx.send(language["languageUpdate"].replace("{language_name}", language_name))
 
 def setup(bot):
     bot.add_cog(Misc(bot))
